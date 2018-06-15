@@ -1,0 +1,10 @@
+import pickle
+f = open('datasets.pkl', 'rb')
+data = pickle.load(f)
+print(data.keys())
+print(data['flip0195.jpg'])
+# f = open('prior_boxes_ssd300.pkl', 'rb')
+# data = pickle.load(f)
+# print(data)
+# print(type(data))
+# print(data.shape)
