@@ -18,9 +18,9 @@ from scipy.misc import imread
 from scipy.misc import imresize
 import tensorflow as tf
 
-from ssd import SSD300
-from ssd_training import MultiboxLoss
-from ssd_utils import BBoxUtility
+from ssd.ssd import SSD300
+from ssd.ssd_training import MultiboxLoss
+from ssd.ssd_utils import BBoxUtility
 
 plt.rcParams['figure.figsize'] = (8, 8)
 plt.rcParams['image.interpolation'] = 'nearest'
@@ -32,7 +32,8 @@ GPU_COUNT = 4
 NUM_CLASSES = 6 #4
 INPUT_SHAPE = (300, 300, 3)
 EPOCHS = 200
-BATCH_SIZE = 6 * GPU_COUNT
+#BATCH_SIZE = 4
+BATCH_SIZE = 4 * GPU_COUNT
 priors = pickle.load(open('prior_boxes_ssd300.pkl', 'rb'))
 bbox_util = BBoxUtility(NUM_CLASSES, priors)
 
@@ -249,13 +250,21 @@ base_lr = 3e-4
 optim = keras.optimizers.Adam(lr=base_lr)
 parallel_model.compile(optimizer=optim,
               loss=MultiboxLoss(NUM_CLASSES, neg_pos_ratio=2.0).compute_loss)
-
+# model.compile(optimizer=optim,
+#               loss=MultiboxLoss(NUM_CLASSES, neg_pos_ratio=2.0).compute_loss)
 history = parallel_model.fit_generator(gen.generate(True), gen.train_batches,
                               epochs=EPOCHS, verbose=1,
                               callbacks=callbacks,
                               validation_data=gen.generate(False),
                               validation_steps=gen.val_batches,
                               use_multiprocessing=True)
+
+# history = model.fit_generator(gen.generate(True), gen.train_batches,
+#                               epochs=EPOCHS, verbose=1,
+#                               callbacks=callbacks,
+#                               validation_data=gen.generate(False),
+#                               validation_steps=gen.val_batches,
+#                               workers=1)
 
 loss = history.history['loss']
 val_loss = history.history['val_loss']
